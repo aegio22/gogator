@@ -10,6 +10,12 @@ import (
 
 const configFileName = ".gatorconfig.json"
 
+// State struct- represent "source of truth" state for db config
+type State struct {
+	CfgPointer *Config
+}
+
+// Database configuration info struct representation
 type Config struct {
 	DbURL           string `json:"db_url"`
 	CurrentUserName string `json:"current_user_name"`
@@ -19,6 +25,7 @@ func (cfg Config) Repr() {
 	fmt.Printf("Config{\n	DbURL: %s,\n	CurrentUserName: %s\n}\n", cfg.DbURL, cfg.CurrentUserName)
 }
 
+// Set username based on argument then update the user info in the config file
 func (cfg Config) SetUser(username string) error {
 	if username == "" {
 		return errors.New("no username provided")
@@ -34,6 +41,7 @@ func (cfg Config) SetUser(username string) error {
 
 }
 
+// Helper - write config struct to file as JSON object
 func write(cfg Config) error {
 	path, err := getConfigFilePath()
 	if err != nil {
@@ -50,6 +58,7 @@ func write(cfg Config) error {
 	return nil
 }
 
+// Helper - fetch config filepath
 func getConfigFilePath() (string, error) {
 	home, err := os.UserHomeDir()
 	if err != nil {
@@ -62,6 +71,7 @@ func getConfigFilePath() (string, error) {
 	return filepath.Join(home, configFileName), nil
 }
 
+// Return user data from config file as Config struct
 func Read() (Config, error) {
 	var cfg Config
 	path, err := getConfigFilePath()
