@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"os"
 	"time"
 
 	"github.com/aegio22/gogator/internal/config"
@@ -13,10 +14,12 @@ import (
 
 func HandlerRegister(s *config.State, cmd Command) error {
 	if len(cmd.Args) < 1 {
+		os.Exit(1)
 		return errors.New("no arguments provided- register command expects a name")
 	}
 
 	if len(cmd.Args) > 1 {
+		os.Exit(1)
 		return errors.New("too many arguments provided- register command expects a name")
 	}
 
@@ -24,6 +27,7 @@ func HandlerRegister(s *config.State, cmd Command) error {
 
 	userVerification, _ := s.DbQueries.GetUser(ctx, cmd.Args[0])
 	if userVerification != (database.User{}) {
+		os.Exit(1)
 		return fmt.Errorf("user '%s' already in database", cmd.Args[0])
 	}
 
@@ -34,10 +38,12 @@ func HandlerRegister(s *config.State, cmd Command) error {
 		Name:      cmd.Args[0],
 	})
 	if err != nil {
+		os.Exit(1)
 		return fmt.Errorf("error creating user: %v", err)
 	}
 	err = s.CfgPointer.SetUser(user.Name)
 	if err != nil {
+		os.Exit(1)
 		return fmt.Errorf("error setting user: %v", err)
 	}
 	fmt.Println("User created successfully:")

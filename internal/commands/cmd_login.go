@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"os"
 
 	"github.com/aegio22/gogator/internal/config"
 	"github.com/aegio22/gogator/internal/database"
@@ -11,10 +12,12 @@ import (
 
 func HandlerLogin(s *config.State, cmd Command) error {
 	if len(cmd.Args) < 1 {
+		os.Exit(1)
 		return errors.New("no arguments provided- login command expects a username")
 	}
 
 	if len(cmd.Args) > 1 {
+		os.Exit(1)
 		return errors.New("too many arguments provided- login command expects a username")
 	}
 	userVerification, _ := s.DbQueries.GetUser(context.Background(), cmd.Args[0])
@@ -29,6 +32,7 @@ func HandlerLogin(s *config.State, cmd Command) error {
 	err := s.CfgPointer.SetUser(arg)
 
 	if err != nil {
+		os.Exit(1)
 		return fmt.Errorf("error setting user: %v", err)
 	}
 
