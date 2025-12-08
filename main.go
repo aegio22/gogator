@@ -1,11 +1,14 @@
 package main
 
 import (
+	"database/sql"
 	"log"
 	"os"
 
 	"github.com/aegio22/gogator/internal/commands"
 	"github.com/aegio22/gogator/internal/config"
+	"github.com/aegio22/gogator/internal/database"
+	_ "github.com/lib/pq"
 )
 
 func main() {
@@ -20,9 +23,16 @@ func main() {
 	}
 
 	state := config.State{CfgPointer: &cfg}
+	db, err := sql.Open("postgres", state.CfgPointer.DbURL)
+	if err != nil {
+		log.Fatal(err)
+	}
+	dbQueries := database.New(db)
+	state.DbQueries = dbQueries
 
 	cmds := commands.Commands{CommandMap: map[string]func(*config.State, commands.Command) error{}}
 	cmds.Register("login", commands.HandlerLogin)
+	cmds.Register("register", commands.HandlerRegister)
 
 	commandName := os.Args[1]
 	args := os.Args[2:]

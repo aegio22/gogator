@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+
+	"github.com/aegio22/gogator/internal/database"
 )
 
 const configFileName = ".gatorconfig.json"
@@ -13,6 +15,7 @@ const configFileName = ".gatorconfig.json"
 // State struct- represent "source of truth" state for db config
 type State struct {
 	CfgPointer *Config
+	DbQueries  *database.Queries
 }
 
 // Database configuration info struct representation
