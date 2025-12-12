@@ -11,17 +11,13 @@ import (
 	"github.com/google/uuid"
 )
 
-func HandlerAddFeed(s *config.State, cmd Command) error {
+func HandlerAddFeed(s *config.State, cmd Command,user database.User) error {
 	if len(cmd.Args) != 2 {
 		return errors.New("add feed command takes 2 arguments, a feed name and feed url")
 	}
 	ctx := context.Background()
 
-	currUser := s.CfgPointer.CurrentUserName
-	user, err := s.DbQueries.GetUser(ctx, currUser)
-	if err != nil {
-		return fmt.Errorf("error getting user %s: %w", currUser, err)
-	}
+
 
 	feed, err := s.DbQueries.CreateFeed(ctx, database.CreateFeedParams{
 		ID:        uuid.New(),

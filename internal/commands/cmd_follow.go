@@ -11,16 +11,12 @@ import (
 	"github.com/google/uuid"
 )
 
-func HandlerFollow(s *config.State, cmd Command) error {
+func HandlerFollow(s *config.State, cmd Command, user database.User) error {
 	if len(cmd.Args) != 1 {
 		return errors.New("follow command takes a single url argument")
 	}
 
 	ctx := context.Background()
-	currUser, err := s.DbQueries.GetUser(ctx, s.CfgPointer.CurrentUserName)
-	if err != nil {
-		return fmt.Errorf("error fetching current user: %w", err)
-	}
 
 	feed, err := s.DbQueries.GetFeedByURL(ctx, cmd.Args[0])
 	if err != nil {
@@ -31,7 +27,7 @@ func HandlerFollow(s *config.State, cmd Command) error {
 		ID:        uuid.New(),
 		CreatedAt: time.Now(),
 		UpdatedAt: time.Now(),
-		UserID:    currUser.ID,
+		UserID:    user.ID,
 		FeedID:    feed.ID,
 	})
 	if err != nil {

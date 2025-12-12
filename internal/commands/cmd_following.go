@@ -6,18 +6,16 @@ import (
 	"fmt"
 
 	"github.com/aegio22/gogator/internal/config"
+	"github.com/aegio22/gogator/internal/database"
 )
 
-func HandlerFollowing(s *config.State, cmd Command) error {
+func HandlerFollowing(s *config.State, cmd Command, user database.User) error {
 	if len(cmd.Args) != 0 {
 		return errors.New("follows command takes no arguments")
 	}
 	ctx := context.Background()
-	currUser, err := s.DbQueries.GetUser(ctx, s.CfgPointer.CurrentUserName)
-	if err != nil {
-		return fmt.Errorf("error fetching user: %w", err)
-	}
-	follows, err := s.DbQueries.GetFeedFollowsForUser(ctx, currUser.ID)
+
+	follows, err := s.DbQueries.GetFeedFollowsForUser(ctx, user.ID)
 	if err != nil {
 		return fmt.Errorf("error getting feed follows for user %s: %w", s.CfgPointer.CurrentUserName, err)
 	}
