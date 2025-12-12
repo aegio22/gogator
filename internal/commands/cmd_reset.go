@@ -13,14 +13,16 @@ func HandlerReset(s *config.State, cmd Command) error {
 		return errors.New("reset command takes no arguments")
 	}
 
-	err := s.DbQueries.DeleteUsers(context.Background())
+	err := s.DbQueries.DeletePosts(context.Background())
+	if err != nil {
+		return err
+	}
+
+	err = s.DbQueries.DeleteUsers(context.Background())
 	if err != nil {
 		return fmt.Errorf("error resetting database: %v", err)
 
 	}
-	/*err := s.DbQueries.DeletePosts(context.Background())
-	if err != nil {
-		return err
-	}*/
+
 	return nil
 }
