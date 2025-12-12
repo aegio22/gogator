@@ -18,6 +18,9 @@ func HandlerReset(s *config.State, cmd Command) error {
 		return fmt.Errorf("error resetting database: %v", err)
 
 	}
-
+	/*err := s.DbQueries.DeletePosts(context.Background())
+	if err != nil {
+		return err
+	}*/
 	return nil
 }

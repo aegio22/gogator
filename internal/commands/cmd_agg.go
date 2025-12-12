@@ -2,13 +2,17 @@ package commands
 
 import (
 	"context"
+	"database/sql"
 	"errors"
 	"fmt"
+	"log"
 	"time"
 
 	"github.com/aegio22/gogator/internal/config"
 	"github.com/aegio22/gogator/internal/database"
 	"github.com/aegio22/gogator/internal/rss"
+	"github.com/google/uuid"
+	"github.com/lib/pq"
 )
 
 func HandlerAgg(s *config.State, cmd Command) error {
@@ -49,16 +53,42 @@ func scrapeFeeds(s *config.State) error {
 	if err != nil {
 		return fmt.Errorf("error fetching feed by url: %w", err)
 	}
-
-	fmt.Println()
-	fmt.Println()
-	fmt.Println("Feed Name:", fetchedFeed.Channel.Title)
-	fmt.Println("-----------")
-
-	fmt.Println("Feed Items:")
-	fmt.Println("-----------")
 	for _, item := range fetchedFeed.Channel.Item {
-		fmt.Println("Item:", item.Title)
+
+		pubTime, err := time.Parse(time.RFC1123Z, item.PubDate)
+		if err != nil {
+			// Try RFC1123
+			pubTime, err = time.Parse(time.RFC1123, item.PubDate)
+			if err != nil {
+				// If all else fails, use current time
+				pubTime = time.Now()
+			}
+		}
+		//fmt.Println("Item:", item.Title)
+		err = s.DbQueries.CreatePost(ctx, database.CreatePostParams{
+			ID:        uuid.New(),
+			CreatedAt: time.Now(),
+			UpdatedAt: time.Now(),
+			Title: sql.NullString{
+				String: item.Title, Valid: item.Title != ""},
+			Url:         item.Link,
+			Description: sql.NullString{String: item.Description, Valid: item.Description != ""},
+			PublishedAt: pubTime,
+			FeedID:      nextFeed.ID,
+		})
+
+		if err != nil {
+			// lib/pq example:
+			if pgErr, ok := err.(*pq.Error); ok {
+				if pgErr.Code == "23505" { // unique_violation
+					continue
+
+				}
+			}
+			log.Printf("error inserting post: %v", err)
+			continue
+
+		}
 	}
 
 	return nil
